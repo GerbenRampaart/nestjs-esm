@@ -1,71 +1,85 @@
-import { Injectable } from '@nestjs/common';
-import { path } from 'app-root-path';
-import { cwd } from 'process';
-import { AppLoggerService } from '../logger/app-logger.service.js';
-import { processEnv } from '../../utils/processEnv.js';
-import { globSync } from 'glob';
+import { Injectable } from "@nestjs/common";
+import { path as arp } from "app-root-path";
+import { AppLoggerService } from "../logger/app-logger.service.js";
+import { globSync } from "glob";
 
 @Injectable()
 export class PathsService {
   constructor() {
-
     // Example output: [ 'package.json', 'src/services/paths/package.json' ]
-    const allProjectPackageJson = globSync('**/package.json', { 
-      ignore: 'node_modules/**',
-      cwd: path,
-      debug: processEnv.isDebug,
+    const allProjectPackageJson = globSync("**/package.json", {
+      ignore: "node_modules/**",
+      cwd: arp,
     });
 
     // We see the root package.json as the product package.json.
     // If that doesn't exist we're very confused.
-    const productPackageJson = allProjectPackageJson.find(p => p === 'package.json');
+    const productPackageJson = allProjectPackageJson.find((p) =>
+      p === "package.json"
+    );
 
     if (!productPackageJson) {
-      throw new Error(`No product package.json found in the project root. cwd was ${cwd}`);
+      throw new Error(
+        `No product package.json found in the project root. cwd was ${process.cwd()}`,
+      );
     }
 
-    const allLibUtilities = globSync('node_modules/@marketplace-esi/lib-*/package.json', { 
-      cwd: path,
-      debug: processEnv.isDebug,
+    // We're looking for all lib packages which are dependencies in the project.
+    // Those provide useful information for the logger and other services.
+    this.productPath = productPackageJson;
+    this.libPaths = globSync("node_modules/@company-name/lib-*/package.json", {
+      cwd: arp,
     });
-
-
   }
 
-  public webPath?: string;
-  public apiPath: string;
   public productPath: string;
-  public sharedModulesPath: string;
-  public isTurboApp: boolean;
+  public libPaths: string[];
 
-  public get paths(): { n: string, p: string }[] {
+  public get paths(): { n: string; p: string }[] {
     return [
       {
-        n: 'productPath',
+        n: "productPath",
         p: this.productPath,
       },
       {
-        n: 'app-root-path',
-        p: path
+        n: "app-root-path",
+        p: arp,
       },
       {
-        n: 'cwd',
-        p: cwd()
+        n: "cwd",
+        p: process.cwd(),
       },
       {
-        n: '__dirname',
-        p: __dirname
+        n: "import.meta.path",
+        p: import.meta.path,
       },
       {
-        n: '__filename',
-        p: __filename
+        n: "import.meta.dir",
+        p: import.meta.dir,
       },
-    ]
+      {
+        n: "import.meta.file",
+        p: import.meta.file,
+      },
+      {
+        n: "__dirname",
+        p: __dirname,
+      },
+      {
+        n: "__filename",
+        p: __filename,
+      },
+      ...this.libPaths.map((p, i) => {
+        let n = `libPaths[${i}]`;
+        return {
+          n,
+          p,
+        };
+      }),
+    ];
   }
 
   public logPaths(l: AppLoggerService): void {
-    this.paths.forEach(p => 
-      l.log(`${p.n}: ${p.p}`)
-    );
+    this.paths.forEach((p) => l.log(`${p.n}: ${p.p}`));
   }
 }

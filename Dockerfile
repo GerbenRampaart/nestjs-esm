@@ -5,12 +5,13 @@ WORKDIR /usr/app
 
 ENV NODE_ENV=production
 
-COPY ./packages/server/dist/app.js ./server/dist
-COPY ./packages/server/package.json ./server
+COPY ./packages/apps/api/dist/api.js ./api/dist
+COPY ./packages/apps/api/package.json ./api
 
 USER bun
 
-ENTRYPOINT [ "bun", "run", "./server/dist/app.js" ]
+ENTRYPOINT [ "bun", "run", "./api/dist/app.js" ]
 
 # docker build . -t nestjs-bun-esm
 # docker run -it -p 3000:3000 nestjs-bun-esm
+# https://github.com/oven-sh/bun/tree/main/packages/bun-lambda

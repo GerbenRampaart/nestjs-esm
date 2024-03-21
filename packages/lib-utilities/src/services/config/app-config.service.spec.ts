@@ -1,21 +1,21 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { AppHttpService } from "./app-http.service.js";
-import { AppHttpModule } from "./app-http.module.js";
+import { AppConfigService } from "./app-config.service";
+import { AppConfigModule } from "./app-config.module";
 
 describe("AppHttpService", () => {
-  let service: AppHttpService;
+  let service: AppConfigService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
-        AppHttpModule,
+        AppConfigModule,
       ],
       providers: [
-        AppHttpService,
+        AppConfigService,
       ],
     }).compile();
 
-    service = await module.resolve<AppHttpService>(AppHttpService);
+    service = await module.resolve<AppConfigService>(AppConfigService);
   });
 
   it("should be defined", () => {

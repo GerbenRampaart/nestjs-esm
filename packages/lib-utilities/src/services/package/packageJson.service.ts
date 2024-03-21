@@ -1,9 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { existsSync, readFileSync } from 'fs';
-import { dirname, join } from 'path';
-import { PackageJsonContext } from './PackageJsonContext';
-import { PathsService } from '../paths/paths.service';
-import { PackageJson } from 'type-fest';
+import { Injectable } from "@nestjs/common";
+import { existsSync, readFileSync } from "node:fs";
+import { type PackagesType } from "./PackageJsonContext.js";
+import { PathsService } from "../paths/paths.service.js";
+import { type PackageJson } from "type-fest";
 
 @Injectable()
 export class AppPackageJsonService {
@@ -11,60 +10,51 @@ export class AppPackageJsonService {
     private readonly p: PathsService,
   ) {
     const pr = this.loadPj(this.p.productPath);
-    const app = this.loadPj(this.p.apiPath);
-    const sm = this.loadPj(this.p.sharedModulesPath);
-    const web = this.loadPj(this.p.webPath, false);
-    
-    this.ctx = {
-      productPath: pr.p!,
-      productPj: pr.pj!,
-      appPath: app.p!,
-      appPj: app.pj!,
-      smPath: sm.p!,
-      smPj: sm.pj!,
-      webPath: web.p,
-      webPj: web.pj,
+
+    if (!pr) {
+      throw new Error(
+        `No product package.json found in the project root. cwd was ${process.cwd()}`,
+      );
+    }
+
+    this.product = {
+      path: this.p.productPath,
+      pj: pr,
     };
-  }
 
-  public ctx: PackageJsonContext;
+    for (const p of this.p.libPaths) {
+      const pj = this.loadPj(p);
 
-  private loadPj(root: string | undefined, thr = true): {
-    pj: PackageJson | undefined;
-    p: string | undefined;
-  } {
-    if (!root) return { pj: undefined, p: undefined };
-    let pjContent: string | undefined = undefined;
-    let pj: PackageJson | undefined = undefined;
-    let p = join(root, 'package.json');
-
-    if (existsSync(p)) {
-      pjContent = readFileSync(p, {
-        encoding: 'utf-8',
-      });
-    } else {
-      if (thr) {
-        throw new Error(`No package.json found on path ${p}`);
+      if (pj) {
+        this.packages.push({
+          path: p,
+          pj,
+        });
       }
     }
-
-    if (pjContent) {
-      pj = JSON.parse(pjContent);
-    }
-
-    return { pj, p };
   }
 
-  /**
-   * Returns the full path of the main entry file (for NestJs this is main.js) for the currently loaded app.
-   */
-  get appMainJs(): string | undefined {
-    if (!this.ctx.appPj.main) {
-      return undefined;
-    }
+  public product: PackagesType;
+  public packages: PackagesType[] = [];
 
-    const p = this.ctx.appPath;
-    const mainDir = dirname(p);
-    return join(mainDir, this.ctx.appPj.main);
+  private loadPj(p: string): PackageJson | undefined {
+    if (existsSync(p)) {
+      const pjContent = readFileSync(p, {
+        encoding: "utf-8",
+      });
+
+      try {
+        const pj = JSON.parse(pjContent);
+
+        if (pj?.name && pj?.version) {
+          return pj;
+        }
+
+        return undefined;
+      } catch (err) {
+        console.error(err);
+        return undefined;
+      }
+    }
   }
 }

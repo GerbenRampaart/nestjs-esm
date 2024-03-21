@@ -13,7 +13,7 @@
     "forceConsistentCasingInFileNames": false,
     // Enable latest features
     "lib": [
-        "ESNext"
+      "ESNext"
     ],
     "target": "ESNext",
     "module": "ESNext",

@@ -1,15 +1,19 @@
 {
-    "name": "nestjs-esm-app",
-    "version": "0.0.1",
-    "description": "",
-    "author": "Gerben Rampaart",
-    "private": true,
-    "license": "UNLICENSED",
-    "type": "module",
-    "engines": {
-      "node": ">=18"
-    },
-    "workspaces": {
-        
-    }
+  "name": "nestjs-esm-app",
+  "version": "0.0.1",
+  "description": "",
+  "author": "Gerben Rampaart",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {
+    "joi": "^17.12.2",
+    "zod": "^3.22.4"
+  }
 }
