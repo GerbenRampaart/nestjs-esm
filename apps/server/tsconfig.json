@@ -6,11 +6,9 @@
         "experimentalDecorators": true,
         "allowSyntheticDefaultImports": true,
         "sourceMap": true,
-        "outDir": "./dist",
-        "baseUrl": "./",
+        "outDir": "../api/dist",
+        "baseUrl": "../api",
         "incremental": true,
-        "strictNullChecks": false,
-        "noImplicitAny": false,
         "strictBindCallApply": false,
         "forceConsistentCasingInFileNames": false,
         // Enable latest features
