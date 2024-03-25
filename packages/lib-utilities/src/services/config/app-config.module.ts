@@ -1,13 +1,14 @@
 import { Module, forwardRef, type DynamicModule } from "@nestjs/common";
 import { AppConfigService } from "./app-config.service.js";
 import { AppConfigSchema } from "./app-config.schema.js";
-import { ConfigModule } from "@nestjs/config";
 import { NodeEnv } from "../../util/NodeEnv.js";
 import { AppLoggerModule } from "../logger/app-logger.module.js";
+import { ConfigModule } from "@nestjs/config";
+import { AppLoggerService } from "../logger/app-logger.service.js";
 
 @Module({
   imports: [
-    ConfigModule.reg.forRoot({
+    ConfigModule.forRoot({
       validate: (env) => {
         return AppConfigSchema.parse(env);
       },
@@ -29,13 +30,20 @@ import { AppLoggerModule } from "../logger/app-logger.module.js";
     AppConfigService
   ],
 })
-export class AppConfigModule { 
-  static registerAsync(): DynamicModule {
+export class AppConfigModule {
+  public static async registerAsync(): Promise<DynamicModule> {
     return {
       module: AppConfigModule,
-      imports: [AppLoggerModule],
-      providers: [AppConfigService],
-      exports: [AppConfigService],
-    };
+      imports: [
+        AppLoggerModule
+      ],
+      providers: [
+        AppLoggerService
+      ],
+      exports: [
+        AppConfigService
+      ]
+    }
+
   }
 }

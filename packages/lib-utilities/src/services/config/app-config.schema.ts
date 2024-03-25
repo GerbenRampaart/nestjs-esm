@@ -20,6 +20,8 @@ export const AppConfigSchema = z.object({
     "debug",
     "trace", 
   ]).optional().default("info"),
+
+  
 });
 
 export type ProcessEnv = z.infer<typeof AppConfigSchema>;
