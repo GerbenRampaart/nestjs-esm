@@ -1,6 +1,7 @@
+/**
+ * Array from pino.LevelWithSilent
+ */
 export const pinoLevels: string[] = [
-  // These are all values of the union LevelWithSilent of pino.
-  // TODO: LevelWithSilent union type to string[]?
   "silent",
   "fatal",
   "error",
@@ -9,3 +10,13 @@ export const pinoLevels: string[] = [
   "debug",
   "trace",
 ] as const;
+
+export function logLevelOrDefault(): string {
+  const v = process.env['LOG_LEVEL'] ?? 'debug';
+
+  if (!pinoLevels.includes(v)) {
+      return 'debug';
+  }
+
+  return v;
+}

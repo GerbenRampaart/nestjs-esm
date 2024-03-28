@@ -1,44 +1,43 @@
-import { Module, forwardRef, type DynamicModule } from "@nestjs/common";
+import { Module, type DynamicModule } from "@nestjs/common";
 import { AppConfigService } from "./app-config.service.js";
-import { AppConfigSchema } from "./app-config.schema.js";
 import { NodeEnv } from "../../util/NodeEnv.js";
-import { AppLoggerModule } from "../logger/app-logger.module.js";
-import { ConfigModule } from "@nestjs/config";
-import { AppLoggerService } from "../logger/app-logger.service.js";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { z } from "zod";
 
-@Module({
-  imports: [
-    ConfigModule.forRoot({
-      validate: (env) => {
-        return AppConfigSchema.parse(env);
-      },
-      isGlobal: true,
-      validationOptions: {
-        allowUnknown: true,
-        abortEarly: false, // output all errors
-      },
-      envFilePath: `.env.${process.env.NODE_ENV}`,
-      ignoreEnvFile: !NodeEnv.isDebug,
-      cache: true,
-    }),
-    forwardRef(() => AppLoggerModule),
-  ],
-  providers: [
-    AppConfigService
-  ],
-  exports: [
-    AppConfigService
-  ],
-})
+export type ProcessEnvSchema<TSchema extends z.ZodRawShape> = z.ZodObject<TSchema>;
+
+@Module({})
 export class AppConfigModule {
-  public static async registerAsync(): Promise<DynamicModule> {
+  public static async registerAsync<TSchema extends z.ZodRawShape = {}>(processEnv?: ProcessEnvSchema<TSchema>): Promise<DynamicModule> {
+    //type targetType = z.infer<typeof processEnv>;
     return {
       module: AppConfigModule,
       imports: [
-        AppLoggerModule
+        ConfigModule.forRoot({
+          validate: (env) => {
+            return processEnv?.parse(env) ?? env;
+          },
+          isGlobal: true,
+          validationOptions: {
+            allowUnknown: true,
+            abortEarly: false, // output all errors
+          },
+          envFilePath: `.env.${process.env.NODE_ENV}`,
+          ignoreEnvFile: !NodeEnv.isDebug,
+          cache: true,
+        }),
       ],
       providers: [
-        AppLoggerService
+        {
+          useFactory: (c: ConfigService<TSchema, true>) => {
+            return new AppConfigService(c)
+          },
+          provide: AppConfigService,
+          inject: [
+            ConfigService
+          ]
+        }
+        
       ],
       exports: [
         AppConfigService

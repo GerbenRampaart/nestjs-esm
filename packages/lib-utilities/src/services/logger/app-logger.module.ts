@@ -16,14 +16,11 @@ import { LibUtilitiesConstants } from "../../util/LibUtilitiesConstants";
   imports: [
     LoggerModule.forRootAsync({
       imports: [
-        forwardRef(() => LibUtilitiesModule),
       ],
       inject: [
-        AppConfigService,
         AppPackageJsonService,
       ],
       useFactory: async (
-        config: AppConfigService,
         pj: AppPackageJsonService,
       ) => {
         // https://github.com/pinojs/pino-pretty#options
