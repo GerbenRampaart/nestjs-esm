@@ -8,8 +8,10 @@ export type ProcessEnvSchema<TSchema extends z.ZodRawShape> = z.ZodObject<TSchem
 
 @Module({})
 export class AppConfigModule {
-  public static async registerAsync<TSchema extends z.ZodRawShape = {}>(processEnv?: ProcessEnvSchema<TSchema>): Promise<DynamicModule> {
-    //type targetType = z.infer<typeof processEnv>;
+  public static async registerAsync<TSchema extends z.ZodRawShape = {}>(
+    processEnv?: ProcessEnvSchema<TSchema>
+  ): Promise<DynamicModule> {
+    
     return {
       module: AppConfigModule,
       imports: [

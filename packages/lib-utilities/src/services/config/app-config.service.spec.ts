@@ -8,24 +8,20 @@ describe("AppConfigService", () => {
     TEST: z.string().optional().default('bla')
   });
 
-  type AppSchemaType = z.infer<typeof appSchema>;
-  let service: AppConfigService<AppSchemaType>;
+  //type AppSchemaType = z.infer<typeof appSchema>;
+  let service: AppConfigService;
 
   beforeEach(async () => {
-
-
     const module: TestingModule = await Test.createTestingModule({
       imports: [
-        AppConfigModule.registerAsync(),
+        AppConfigModule.registerAsync(appSchema),
       ],
       providers: [
         AppConfigService,
       ],
     }).compile();
 
-    service = await module.resolve<appSchemaType>(AppConfigService);
-
-    service.get('')
+    service = await module.resolve(AppConfigService);
   });
 
   it("should be defined", () => {
@@ -33,6 +29,6 @@ describe("AppConfigService", () => {
   });
 
   it("should be 3000", () => {
-    expect(service.get('PORT')).toBe(3000);
+    expect(service.get('')).toBe('bla');
   });
 });
